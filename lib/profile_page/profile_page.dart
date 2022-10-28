@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../custom_code/actions/index.dart' as actions;
 
 class ProfilePageWidget extends StatefulWidget {
   const ProfilePageWidget({Key? key}) : super(key: key);
@@ -553,26 +554,15 @@ class _ProfilePageWidgetState extends State<ProfilePageWidget> {
                 padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
                 child: InkWell(
                   onTap: () {
-                    AwesomeDialog(
-                      context: context,
-                      dialogType: DialogType.info,
-                      animType: AnimType.rightSlide,
-                      title: 'Xác nhận',
-                      titleTextStyle:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      desc: 'Xác nhận đăng xuất khỏi tài khoản này',
-                      descTextStyle: TextStyle(fontSize: 15),
-                      btnOkText: "Đồng ý",
-                      btnCancelText: "Thoát",
-                      btnCancelOnPress: () {},
-                      btnOkOnPress: () async {
-                        setState(() {
-                          FFAppState().userName = "";
-                          FFAppState().passWord = "";
-                        });
-                        context.pushNamed('LogIn');
-                      },
-                    )..show();
+                    actions.popupConfirm(
+                        context, "Xác nhận đăng xuất khỏi tài khoản này",
+                        () async {
+                      setState(() {
+                        FFAppState().userName = "";
+                        FFAppState().passWord = "";
+                      });
+                      context.pushNamed('LogIn');
+                    });
                   },
                   child: Container(
                     width: double.infinity,

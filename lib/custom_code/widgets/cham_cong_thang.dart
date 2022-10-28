@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import '../../cham_cong_chi_tiet_tre_som/cham_cong_chi_tiet_tre_som_widget.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import '../../custom_code/actions/index.dart' as actions;
 
 class ChamCongThang extends StatefulWidget {
   const ChamCongThang({
@@ -39,8 +40,6 @@ class _ChamCongThangState extends State<ChamCongThang> {
   dynamic dateSelected;
 
   List? selectedEvent;
-
-
 
   List<dynamic> timeKeep;
   _ChamCongThangState(this.timeKeep);
@@ -200,6 +199,23 @@ class _ChamCongThangState extends State<ChamCongThang> {
     return _statusR;
   }
 
+  void gotoDate(DateTime selectedDay) {
+    String shiftName = returnShiftName(selectedDay);
+    if (shiftName != "") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChamCongChiTietTreSomCopyWidget(
+            dateSelected: selectedDay.toString(),
+          ),
+        ),
+      );
+    } else {
+      actions.toastMessage(
+          context, "Warning", "Thông báo", "Ngày được chọn chưa được xếp ca");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -246,7 +262,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                             startingDayOfWeek: StartingDayOfWeek.monday,
                             daysOfWeekVisible: true,
                             availableCalendarFormats: const {
-                              CalendarFormat.month: 'Tháng'                            
+                              CalendarFormat.month: 'Tháng'
                             },
                             daysOfWeekStyle: DaysOfWeekStyle(
                                 weekendStyle: TextStyle(color: Colors.red)),
@@ -260,15 +276,8 @@ class _ChamCongThangState extends State<ChamCongThang> {
                               setState(() {
                                 selectedDay = selectDay;
                                 focusedDay = focusedDay;
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChamCongChiTietTreSomCopyWidget(
-                                      dateSelected: selectedDay.toString(),
-                                    ),
-                                  ),
-                                );
+
+                                gotoDate(selectDay);
                               });
                             },
                             calendarBuilders: CalendarBuilders(
@@ -307,7 +316,10 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                             color:
                                                 returnShiftName(datetime) == ""
                                                     ? Colors.grey
-                                                    : returnToday(datetime) ? Color.fromARGB(255, 252, 3, 231) :   Colors.white,
+                                                    : returnToday(datetime)
+                                                        ? Color.fromARGB(
+                                                            255, 252, 3, 231)
+                                                        : Colors.white,
                                             fontWeight: FontWeight.bold),
                                       ),
                                       SizedBox(
@@ -315,8 +327,13 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                       ),
                                       Text(
                                         returnShiftName(datetime),
+                                        textAlign: TextAlign.center,
                                         style: TextStyle(
-                                            fontSize: 9, color: returnToday(datetime) ? Color.fromARGB(255, 252, 3, 231) : Colors.white),
+                                            fontSize: 9,
+                                            color: returnToday(datetime)
+                                                ? Color.fromARGB(
+                                                    255, 252, 3, 231)
+                                                : Colors.white),
                                       ),
                                     ],
                                   ),
@@ -347,7 +364,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                    padding: EdgeInsets.fromLTRB(0, 0, 3, 0),
                                     child: Container(
                                       height: 18,
                                       width: 18,
@@ -368,7 +385,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                    padding: EdgeInsets.fromLTRB(0, 0, 3, 0),
                                     child: Container(
                                       height: 18,
                                       width: 18,
@@ -389,7 +406,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                    padding: EdgeInsets.fromLTRB(0, 0, 3, 0),
                                     child: Container(
                                       height: 18,
                                       width: 18,
@@ -419,7 +436,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                    padding: EdgeInsets.fromLTRB(0, 0, 3, 0),
                                     child: Container(
                                       height: 18,
                                       width: 18,
@@ -440,7 +457,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                    padding: EdgeInsets.fromLTRB(0, 0, 3, 0),
                                     child: Container(
                                       height: 18,
                                       width: 18,
@@ -461,7 +478,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                    padding: EdgeInsets.fromLTRB(0, 0, 3, 0),
                                     child: Container(
                                       height: 18,
                                       width: 18,
