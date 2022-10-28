@@ -259,7 +259,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
         } else {
           var arrayDate = sort3Argument(timeInTS, timeOutTS, startTime);
           timeInApp = arrayDate[0];
-          timeOutApp = arrayDate[2];
+          timeOutApp = arrayDate[1];
         }
       }
     }
@@ -277,7 +277,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
         } else {
           var arrayDate = sort3Argument(timeInTS, timeOutTS, endTime);
           timeInApp = arrayDate[0];
-          timeOutApp = arrayDate[2];
+          timeOutApp = arrayDate[1];
         }
       }
     }
@@ -3714,7 +3714,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
       dynamic reason,
       String status,
       double otHours,
-      double otHoursApproved,
+      dynamic otHoursApproved,
       int index) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(0),

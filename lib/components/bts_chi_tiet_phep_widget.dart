@@ -8,6 +8,8 @@ import '../flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import '../../custom_code/actions/index.dart' as actions;
 
+
+
 class BtsChiTietPhepWidget extends StatefulWidget {
   const BtsChiTietPhepWidget(
       {Key? key, this.listFurlough, this.furloughNP, this.updateList})
@@ -105,7 +107,9 @@ class _BtsChiTietPhepWidgetState extends State<BtsChiTietPhepWidget> {
     } else
       actions.toastMessage(
           context, "Warning", "Thông báo", "Không lấy được số phép tồn");
+    
     widget.updateList(furloughNP, noSalary, listFurlough);
+    
   }
 
   void changeHaftFurlough(

@@ -53,8 +53,12 @@ class _FlutterFlowDropDownState extends State<FlutterFlowDropDown> {
 
   @override
   Widget build(BuildContext context) {
+    if (effectiveOptions.isNotEmpty) {
+      if (widget.initialOption != null) 
+      dropDownValue = widget.initialOption;
+    }
     final dropdownWidget = DropdownButton<String>(
-      value: effectiveOptions.contains(widget.initialOption) ? widget.initialOption : null,
+      value: effectiveOptions.contains(dropDownValue) ? dropDownValue : null,
       hint: widget.hintText != null
           ? Text(widget.hintText!, style: widget.textStyle)
           : null,
