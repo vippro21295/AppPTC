@@ -1,6 +1,7 @@
 import 'package:shimmer/shimmer.dart';
 
 import '../backend/api_requests/api_calls.dart';
+import '../custom_code/actions/shimmer.dart';
 import '../flutter_flow/flutter_flow_icon_button.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import '../flutter_flow/flutter_flow_util.dart';
@@ -30,28 +31,7 @@ class _ChamCongWidgetState extends State<ChamCongWidget> {
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
-          return Scaffold(
-            // body: Center(
-            //   child: SizedBox(
-            //     width: 50,
-            //     height: 50,
-            //     child: SpinKitFoldingCube(
-            //       color: FlutterFlowTheme.of(context).primaryColor,
-            //       size: 50,
-            //     ),
-            //   ),
-            // ),
-            body: Center(
-              child: Shimmer.fromColors(
-                baseColor: Colors.white,
-                highlightColor: Colors.grey,
-                child: Text(
-                  "LOADING...",
-                  style: TextStyle(fontSize: 32),
-                ),
-              ),
-            ),
-          );
+          return ShimmerLoading();
         }
         final chamCongPTCTitleResponse = snapshot.data!;
         return Scaffold(

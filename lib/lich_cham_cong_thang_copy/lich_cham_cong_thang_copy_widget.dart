@@ -1,6 +1,7 @@
 import 'package:shimmer/shimmer.dart';
 
 import '../backend/api_requests/api_calls.dart';
+import '../custom_code/actions/shimmer.dart';
 import '../flutter_flow/flutter_flow_icon_button.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import '../flutter_flow/flutter_flow_util.dart';
@@ -29,18 +30,7 @@ class _LichChamCongThangCopyWidgetState
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
-          return Scaffold(
-             body: Center(
-              child: Shimmer.fromColors(
-                baseColor: Colors.white,
-                highlightColor: Colors.grey,
-                child: Text(
-                  "LOADING...",
-                  style: TextStyle(fontSize: 24),
-                ),
-              ),
-            ),
-          );
+          return ShimmerLoading();
         }
         final lichChamCongThangCopyPTCTimekeepResponse = snapshot.data;
         return Scaffold(

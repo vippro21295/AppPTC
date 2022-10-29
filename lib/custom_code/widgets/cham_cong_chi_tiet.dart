@@ -12,6 +12,7 @@ import '../../flutter_flow/flutter_flow_widgets.dart';
 import '../../custom_code/actions/index.dart' as actions;
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../actions/shimmer.dart';
 import '../model/furlough.dart';
 import '../model/furlough_ticket.dart';
 
@@ -75,6 +76,10 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
   bool? showDoiCa = false;
   bool? showDoiTUA = false;
 
+  bool? showNPTT = true;
+  bool? showNPCD = false;
+  bool? showNPBHXH = false;
+
   bool? isTypeTS = false;
 
   late dynamic timeInApp;
@@ -89,7 +94,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
   String? dropDownlateReasonTS;
   String? dropDowntypeCT;
   String? dropDowntypeTC;
-  String? dropDownTypeNP;
+  String? dropDownTypeNP = "Nghỉ phép năm";
 
   TextEditingController txtGhiChuTS = TextEditingController();
   TextEditingController txtGhiChuCT = TextEditingController();
@@ -362,6 +367,22 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
           timeOutApp = arrayDate[1];
         }
       }
+    }
+  }
+
+  void changeTypeNP() {
+    if (dropDownTypeNP == "Nghỉ phép năm") {
+      showNPTT = true;
+      showNPCD = false;
+      showNPBHXH = false;
+    } else if (dropDownTypeNP == "Nghỉ BHXH") {
+      showNPTT = false;
+      showNPCD = true;
+      showNPBHXH = false;
+    } else if (dropDownTypeNP == "Nghỉ chế độ") {
+      showNPTT = false;
+      showNPCD = false;
+      showNPBHXH = true;
     }
   }
 
@@ -660,7 +681,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
         context,
         "Xác nhận gửi phiếu nghỉ phép",
         () async {
-           setState(() {
+          setState(() {
             isLoading = true;
           });
 
@@ -733,7 +754,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
           content = "Xác nhận hủy phiếu tăng ca";
         }
         break;
-         case "NP":
+      case "NP":
         {
           content = "Xác nhận hủy phiếu nghỉ phép";
         }
@@ -834,7 +855,9 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
           if (!response[0]) {
             FurloughTicket furloughTicket = new FurloughTicket();
             furloughTicket.shiftName = response[2].toString();
-            furloughTicket.shiftId = response[1].toString() == "" ? 0 : int.parse(response[1].toString());
+            furloughTicket.shiftId = response[1].toString() == ""
+                ? 0
+                : int.parse(response[1].toString());
             furloughTicket.fromDate = DateFormat("dd/MM/yyyy").format(newDate);
             furloughTicket.toDate = DateFormat("dd/MM/yyyy").format(newDate);
             if (response[2].toString() == "CH1" ||
@@ -894,7 +917,9 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
           if (!response[0]) {
             FurloughTicket furloughTicket = new FurloughTicket();
             furloughTicket.shiftName = response[2].toString();
-            furloughTicket.shiftId = response[1].toString() == "" ? 0 : int.parse(response[1].toString());
+            furloughTicket.shiftId = response[1].toString() == ""
+                ? 0
+                : int.parse(response[1].toString());
             furloughTicket.fromDate = DateFormat("dd/MM/yyyy").format(newDate);
             furloughTicket.toDate = DateFormat("dd/MM/yyyy").format(newDate);
             furloughTicket.haftFurlough = "P";
@@ -913,7 +938,9 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
           if (!response[0]) {
             FurloughTicket furloughTicket = new FurloughTicket();
             furloughTicket.shiftName = response[2].toString();
-            furloughTicket.shiftId = response[1].toString() == "" ? 0 : int.parse(response[1].toString());
+            furloughTicket.shiftId = response[1].toString() == ""
+                ? 0
+                : int.parse(response[1].toString());
             furloughTicket.fromDate = DateFormat("dd/MM/yyyy").format(newDate);
             furloughTicket.toDate = DateFormat("dd/MM/yyyy").format(newDate);
             furloughTicket.haftFurlough = "P";
@@ -1141,18 +1168,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
   @override
   Widget build(BuildContext context) {
     if (isLoading!)
-      return Scaffold(
-        body: Center(
-          child: Shimmer.fromColors(
-            baseColor: Colors.white,
-            highlightColor: Colors.grey,
-            child: Text(
-              "LOADING...",
-              style: TextStyle(fontSize: 24),
-            ),
-          ),
-        ),
-      );
+      return  ShimmerLoading();
     else
       return Container(
         height: widget.height,
@@ -2182,14 +2198,14 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
                         ],
                         if (showNghiPhep!) ...[
                           FlutterFlowDropDown(
-                            initialOption: 'Nghỉ phép năm',
+                            initialOption: dropDownTypeNP,
                             options: [
                               'Nghỉ phép năm',
                               'Nghỉ BHXH',
                               'Nghỉ chế độ'
                             ],
-                            onChanged: (val) =>
-                                setState(() => dropDownTypeNP = val),
+                            onChanged: (val) => setState(
+                                () => {dropDownTypeNP = val, changeTypeNP()}),
                             width: double.infinity,
                             height: 52,
                             textStyle:
@@ -2215,201 +2231,247 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
                           SizedBox(
                             height: 10,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      0, 0, 5, 0),
-                                  child: TextField(
-                                    controller: fromDateNP,
-                                    onTap: () async {
-                                      DateTime? pickeddate =
-                                          await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime.now(),
-                                              firstDate: DateTime(2000),
-                                              lastDate: DateTime(2101));
-                                      if (pickeddate != null) {
-                                        setState(() {
-                                          fromDateNP.text =
-                                              DateFormat('dd/MM/yyyy')
-                                                  .format(pickeddate);
-                                        });
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                      labelText: 'Nghỉ từ ngày',
-                                      hintStyle: FlutterFlowTheme.of(context)
-                                          .bodyText2,
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .lineColor,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .lineColor,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .stateRED2,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .stateRED2,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      filled: true,
-                                      fillColor:
-                                          FlutterFlowTheme.of(context).theme2,
-                                      suffixIcon: Icon(
-                                        FFIcons.kcalendarAddOn,
-                                        color: Color(0xFF979DA3),
-                                        size: 24,
-                                      ),
-                                    ),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyText1
-                                        .override(
-                                          fontFamily: 'Inter',
-                                          color: Color(0xFF979DA3),
-                                          fontSize: 12,
-                                          lineHeight: 1,
-                                        ),
-                                    keyboardType: TextInputType.none,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      5, 0, 0, 0),
-                                  child: TextFormField(
-                                    controller: toDateNP,
-                                    onTap: () async {
-                                      DateTime? pickeddate =
-                                          await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime.now(),
-                                              firstDate: DateTime(2000),
-                                              lastDate: DateTime(2101));
-                                      if (pickeddate != null) {
-                                        setState(() {
-                                          addDateNP(pickeddate);
-                                        });
-                                      }
-                                    },
-                                    obscureText: false,
-                                    decoration: InputDecoration(
-                                      labelText: 'Nghỉ đến ngày',
-                                      hintStyle: FlutterFlowTheme.of(context)
-                                          .bodyText2,
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .lineColor,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .lineColor,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .stateRED2,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .stateRED2,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      filled: true,
-                                      fillColor:
-                                          FlutterFlowTheme.of(context).theme2,
-                                      suffixIcon: Icon(
-                                        FFIcons.kcalendarAddOn,
-                                        color: Color(0xFF979DA3),
-                                        size: 24,
-                                      ),
-                                    ),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyText1
-                                        .override(
-                                          fontFamily: 'Inter',
-                                          color: Color(0xFF979DA3),
-                                          fontSize: 12,
-                                          lineHeight: 1,
-                                        ),
-                                    keyboardType: TextInputType.none,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.only(
-                                            bottomLeft: Radius.circular(0),
-                                            bottomRight: Radius.circular(0),
-                                            topLeft: Radius.circular(8),
-                                            topRight: Radius.circular(0),
+                          if (showNPTT!) ...[
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        0, 0, 5, 0),
+                                    child: TextField(
+                                      controller: fromDateNP,
+                                      onTap: () async {
+                                        DateTime? pickeddate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2101));
+                                        if (pickeddate != null) {
+                                          setState(() {
+                                            fromDateNP.text =
+                                                DateFormat('dd/MM/yyyy')
+                                                    .format(pickeddate);
+                                          });
+                                        }
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: 'Nghỉ từ ngày',
+                                        hintStyle: FlutterFlowTheme.of(context)
+                                            .bodyText2,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
                                           ),
-                                          child: Container(
-                                            width: double.infinity,
-                                            height: 35,
-                                            constraints: BoxConstraints(
-                                              maxWidth: 132,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        filled: true,
+                                        fillColor:
+                                            FlutterFlowTheme.of(context).theme2,
+                                        suffixIcon: Icon(
+                                          FFIcons.kcalendarAddOn,
+                                          color: Color(0xFF979DA3),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyText1
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            color: Color(0xFF979DA3),
+                                            fontSize: 12,
+                                            lineHeight: 1,
+                                          ),
+                                      keyboardType: TextInputType.none,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        5, 0, 0, 0),
+                                    child: TextFormField(
+                                      controller: toDateNP,
+                                      onTap: () async {
+                                        DateTime? pickeddate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2101));
+                                        if (pickeddate != null) {
+                                          setState(() {
+                                            addDateNP(pickeddate);
+                                          });
+                                        }
+                                      },
+                                      obscureText: false,
+                                      decoration: InputDecoration(
+                                        labelText: 'Nghỉ đến ngày',
+                                        hintStyle: FlutterFlowTheme.of(context)
+                                            .bodyText2,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        filled: true,
+                                        fillColor:
+                                            FlutterFlowTheme.of(context).theme2,
+                                        suffixIcon: Icon(
+                                          FFIcons.kcalendarAddOn,
+                                          color: Color(0xFF979DA3),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyText1
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            color: Color(0xFF979DA3),
+                                            fontSize: 12,
+                                            lineHeight: 1,
+                                          ),
+                                      keyboardType: TextInputType.none,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(0),
+                                              bottomRight: Radius.circular(0),
+                                              topLeft: Radius.circular(8),
+                                              topRight: Radius.circular(0),
                                             ),
-                                            decoration: BoxDecoration(
-                                              color: Color(0xFFAFD5FF),
-                                              borderRadius: BorderRadius.only(
-                                                bottomLeft: Radius.circular(0),
-                                                bottomRight: Radius.circular(0),
-                                                topLeft: Radius.circular(8),
-                                                topRight: Radius.circular(0),
+                                            child: Container(
+                                              width: double.infinity,
+                                              height: 35,
+                                              constraints: BoxConstraints(
+                                                maxWidth: 132,
                                               ),
+                                              decoration: BoxDecoration(
+                                                color: Color(0xFFAFD5FF),
+                                                borderRadius: BorderRadius.only(
+                                                  bottomLeft:
+                                                      Radius.circular(0),
+                                                  bottomRight:
+                                                      Radius.circular(0),
+                                                  topLeft: Radius.circular(8),
+                                                  topRight: Radius.circular(0),
+                                                ),
+                                                border: Border.all(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .lineColor,
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    'Số ngày nghỉ',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyText1
+                                                        .override(
+                                                          fontFamily:
+                                                              'Roboto Condensed',
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.normal,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
                                               border: Border.all(
                                                 color:
                                                     FlutterFlowTheme.of(context)
@@ -2422,7 +2484,127 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 Text(
-                                                  'Số ngày nghỉ',
+                                                  furloughNP.numberFurlough
+                                                      .toString(),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .stateRED3,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Đã ứng phép',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily:
+                                                            'Roboto Condensed',
+                                                        color: FlutterFlowTheme
+                                                                .of(context)
+                                                            .backgroundComponents,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  furloughNP.loanLeave
+                                                      .toString(),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .customColor3,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Phép được hưởng',
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyText1
@@ -2437,742 +2619,606 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
                                               ],
                                             ),
                                           ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                furloughNP.numberFurlough
-                                                    .toString(),
-                                                style:
+                                          Container(
+                                            width: double.infinity,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
                                                     FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .stateRED3,
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
+                                                        .lineColor,
                                               ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
                                             ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Đã ứng phép',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .backgroundComponents,
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                furloughNP.loanLeave.toString(),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .customColor3,
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Phép được hưởng',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                furloughNP.leaveRemainPrevYear
-                                                        .toString() +
-                                                    " + " +
-                                                    furloughNP
-                                                        .avaiableLeaveRemain
-                                                        .toString(),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .customColor3,
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Phép có thể ứng',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .backgroundComponents,
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                furloughNP.maxLoanLeave
-                                                    .toString(),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .customColor3,
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(0),
-                                              bottomRight: Radius.circular(0),
-                                              topLeft: Radius.circular(0),
-                                              topRight: Radius.circular(8),
-                                            ),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Phép năm',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                          fontSize: 13,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                furloughNP.annualLeave
-                                                    .toString(),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .customColor3,
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Tạm ứng phép',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .backgroundComponents,
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.normal,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                furloughNP.tempLeave.toString(),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .customColor3,
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Phép còn lại',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                          fontSize: 13,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 44,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(8),
-                                              bottomRight: Radius.circular(0),
-                                              topLeft: Radius.circular(0),
-                                              topRight: Radius.circular(0),
-                                            ),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                furloughNP.leaveRemain
-                                                    .toString(),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .customColor3,
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Chi tiết nghỉ',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 44,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius:
-                                                BorderRadius.circular(0),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              FFButtonWidget(
-                                                onPressed: () async {
-                                                  await showModalBottomSheet(
-                                                    isScrollControlled: true,
-                                                    backgroundColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .tertiaryColor,
-                                                    barrierColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .tertiaryColor,
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return Padding(
-                                                        padding: MediaQuery.of(
-                                                                context)
-                                                            .viewInsets,
-                                                        child: BtsChiTietPhepWidget(
-                                                            listFurlough:
-                                                                listDateArray,
-                                                            furloughNP:
-                                                                furloughNP,
-                                                            updateList:
-                                                                updateListFurlough),
-                                                      );
-                                                    },
-                                                  ).then((value) =>
-                                                      setState(() {}));
-                                                },
-                                                text: 'Xem',
-                                                options: FFButtonOptions(
-                                                  width: 80,
-                                                  height: 30,
-                                                  color: FlutterFlowTheme.of(
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  furloughNP.leaveRemainPrevYear
+                                                          .toString() +
+                                                      " + " +
+                                                      furloughNP
+                                                          .avaiableLeaveRemain
+                                                          .toString(),
+                                                  style: FlutterFlowTheme.of(
                                                           context)
-                                                      .stateRED1,
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .customColor3,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Phép có thể ứng',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily:
+                                                            'Roboto Condensed',
+                                                        color: FlutterFlowTheme
+                                                                .of(context)
+                                                            .backgroundComponents,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  furloughNP.maxLoanLeave
+                                                      .toString(),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .customColor3,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(0),
+                                                bottomRight: Radius.circular(0),
+                                                topLeft: Radius.circular(0),
+                                                topRight: Radius.circular(8),
+                                              ),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Phép năm',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily:
+                                                            'Roboto Condensed',
+                                                        fontSize: 13,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  furloughNP.annualLeave
+                                                      .toString(),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .customColor3,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Tạm ứng phép',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily:
+                                                            'Roboto Condensed',
+                                                        color: FlutterFlowTheme
+                                                                .of(context)
+                                                            .backgroundComponents,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  furloughNP.tempLeave
+                                                      .toString(),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .customColor3,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Phép còn lại',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily:
+                                                            'Roboto Condensed',
+                                                        fontSize: 13,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(8),
+                                                bottomRight: Radius.circular(0),
+                                                topLeft: Radius.circular(0),
+                                                topRight: Radius.circular(0),
+                                              ),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  furloughNP.leaveRemain
+                                                      .toString(),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .customColor3,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Chi tiết nghỉ',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily:
+                                                            'Roboto Condensed',
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                FFButtonWidget(
+                                                  onPressed: () async {
+                                                    await showModalBottomSheet(
+                                                      isScrollControlled: true,
+                                                      backgroundColor:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .tertiaryColor,
+                                                      barrierColor:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .tertiaryColor,
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return Padding(
+                                                          padding:
+                                                              MediaQuery.of(
+                                                                      context)
+                                                                  .viewInsets,
+                                                          child: BtsChiTietPhepWidget(
+                                                              listFurlough:
+                                                                  listDateArray,
+                                                              furloughNP:
+                                                                  furloughNP,
+                                                              updateList:
+                                                                  updateListFurlough),
+                                                        );
+                                                      },
+                                                    ).then((value) =>
+                                                        setState(() {}));
+                                                  },
+                                                  text: 'Xem',
+                                                  options: FFButtonOptions(
+                                                    width: 80,
+                                                    height: 30,
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .stateRED1,
+                                                    textStyle: FlutterFlowTheme
+                                                            .of(context)
+                                                        .subtitle2
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .backgroundComponents,
+                                                          fontSize: 14,
+                                                        ),
+                                                    elevation: 2,
+                                                    borderSide: BorderSide(
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .stateRED3,
+                                                      width: 1,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            height: 35,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFAFD5FF),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Nghỉ không lương',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily:
+                                                            'Roboto Condensed',
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            width: double.infinity,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFFFFFFF5),
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(0),
+                                                bottomRight: Radius.circular(8),
+                                                topLeft: Radius.circular(0),
+                                                topRight: Radius.circular(0),
+                                              ),
+                                              border: Border.all(
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .lineColor,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                FlutterFlowDropDown(
+                                                  initialOption: furloughNP
+                                                      .noSalary
+                                                      .toString(),
+                                                  options: noSalary
+                                                      .map((e) => e.toString())
+                                                      .toList(),
+                                                  onChanged: (val) => {
+                                                    setState(() =>
+                                                        furloughNP.noSalary =
+                                                            double.parse(val!)),
+                                                    changeNoSalary()
+                                                  },
+                                                  width: 90,
+                                                  height: 35,
                                                   textStyle:
                                                       FlutterFlowTheme.of(
                                                               context)
-                                                          .subtitle2
+                                                          .bodyText1
                                                           .override(
                                                             fontFamily: 'Inter',
-                                                            color: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .backgroundComponents,
-                                                            fontSize: 14,
+                                                            color: Colors.black,
                                                           ),
+                                                  hintText: 'Chọn',
+                                                  fillColor: Colors.white,
                                                   elevation: 2,
-                                                  borderSide: BorderSide(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .stateRED3,
-                                                    width: 1,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
+                                                  borderColor:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .lineColor,
+                                                  borderWidth: 0,
+                                                  borderRadius: 10,
+                                                  margin: EdgeInsetsDirectional
+                                                      .fromSTEB(12, 4, 12, 4),
+                                                  hidesUnderline: true,
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Container(
-                                          width: double.infinity,
-                                          height: 35,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFAFD5FF),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Nghỉ không lương',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily:
-                                                              'Roboto Condensed',
-                                                        ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: double.infinity,
-                                          height: 44,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFFFFFF5),
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(0),
-                                              bottomRight: Radius.circular(8),
-                                              topLeft: Radius.circular(0),
-                                              topRight: Radius.circular(0),
-                                            ),
-                                            border: Border.all(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .lineColor,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              FlutterFlowDropDown(
-                                                initialOption: furloughNP
-                                                    .noSalary
-                                                    .toString(),
-                                                options: noSalary
-                                                    .map((e) => e.toString())
-                                                    .toList(),
-                                                onChanged: (val) => {
-                                                  setState(() =>
-                                                      furloughNP.noSalary =
-                                                          double.parse(val!)),
-                                                  changeNoSalary()
-                                                },
-                                                width: 90,
-                                                height: 35,
-                                                textStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyText1
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color: Colors.black,
-                                                        ),
-                                                hintText: 'Chọn',
-                                                fillColor: Colors.white,
-                                                elevation: 2,
-                                                borderColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .lineColor,
-                                                borderWidth: 0,
-                                                borderRadius: 10,
-                                                margin: EdgeInsetsDirectional
-                                                    .fromSTEB(12, 4, 12, 4),
-                                                hidesUnderline: true,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          _buildNote(txtGhiChuNP),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          _buildFileUpload(),
-                          SizedBox(height: 10),
-                          _buildCancelSend(() {
-                            cancelTicket("NP");
-                          }, () {
-                            submitTicketNPTT();
-                          })
+                                  ],
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            _buildNote(txtGhiChuNP),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            _buildFileUpload(),
+                            SizedBox(height: 10),
+                            _buildCancelSend(() {
+                              cancelTicket("NP");
+                            }, () {
+                              submitTicketNPTT();
+                            })
+                          ]
+                          else if(showNPCD!)...[
+                            
+                          ] else if(showNPBHXH!)...[
+
+                          ]
                         ]
                       ],
                     ),
@@ -3713,7 +3759,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
       String date,
       dynamic reason,
       String status,
-      double otHours,
+      dynamic otHours,
       dynamic otHoursApproved,
       int index) {
     return ClipRRect(
