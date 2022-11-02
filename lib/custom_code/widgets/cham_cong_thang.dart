@@ -350,11 +350,11 @@ class _ChamCongThangState extends State<ChamCongThang> {
                               //titleCentered: false,
                               leftChevronVisible: false,
                               rightChevronVisible: false,
-                              headerMargin: EdgeInsets.fromLTRB(10, 10, 20, 15),
+                              headerMargin: EdgeInsets.fromLTRB(10, 10, 20, 5),
                             ),
                           ),
                           SizedBox(
-                            height: 30,
+                            height: 20,
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.max,
@@ -426,7 +426,7 @@ class _ChamCongThangState extends State<ChamCongThang> {
                             ],
                           ),
                           SizedBox(
-                            height: 25,
+                            height: 15,
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.max,

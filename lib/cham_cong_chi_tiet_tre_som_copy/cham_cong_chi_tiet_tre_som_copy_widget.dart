@@ -137,6 +137,11 @@ class _ChamCongChiTietTreSomCopyWidgetState
                                 .jsonBody,
                             r'''$.listReason''')
                         .toList(),
+                         listReasonFurlough: getJsonField(
+                            chamCongChiTietTreSomCopyPTCDetailDateResponse
+                                .jsonBody,
+                            r'''$.listReasonFurlough''')
+                        .toList(),
                     listTimesheet: getJsonField(
                             chamCongChiTietTreSomCopyPTCDetailDateResponse
                                 .jsonBody,

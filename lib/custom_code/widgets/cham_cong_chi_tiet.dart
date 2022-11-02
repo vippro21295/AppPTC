@@ -1,7 +1,7 @@
 // Automatic FlutterFlow imports
 import 'package:phat_tien_work_space/backend/api_requests/api_calls.dart';
 import 'package:phat_tien_work_space/index.dart';
-import 'package:shimmer/shimmer.dart';
+import '../../components/bts_chi_tiet_phep_p_chedo_widget.dart';
 import '../../components/bts_chi_tiet_phep_widget.dart';
 import '../../flutter_flow/flutter_flow_drop_down.dart';
 import '../../flutter_flow/flutter_flow_icon_button.dart';
@@ -28,6 +28,7 @@ class ChamCongChiTiet extends StatefulWidget {
       this.listTypeTS,
       this.listTypeCT,
       this.listReason,
+      this.listReasonFurlough,
       this.listTimesheet,
       this.listHoliday})
       : super(key: key);
@@ -41,6 +42,7 @@ class ChamCongChiTiet extends StatefulWidget {
   final List<dynamic>? listTypeTS;
   final List<dynamic>? listTypeCT;
   final List<dynamic>? listReason;
+  final List<dynamic>? listReasonFurlough;
   final List<dynamic>? listTimesheet;
   final List<dynamic>? listHoliday;
 
@@ -53,6 +55,7 @@ class ChamCongChiTiet extends StatefulWidget {
       listTypeTS!,
       listTypeCT!,
       listReason!,
+      listReasonFurlough!,
       listTimesheet!,
       listHoliday!);
 }
@@ -82,6 +85,9 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
 
   bool? isTypeTS = false;
 
+  int numberFurloughMaxUse = 0;
+  int numberFurloughCD = 0;
+
   late dynamic timeInApp;
   late dynamic timeOutApp;
   late dynamic timeInRestApp;
@@ -94,7 +100,8 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
   String? dropDownlateReasonTS;
   String? dropDowntypeCT;
   String? dropDowntypeTC;
-  String? dropDownTypeNP = "Nghỉ phép năm";
+  String? dropDownTypeNP;
+  String? dropDownTypeNPCD;
 
   TextEditingController txtGhiChuTS = TextEditingController();
   TextEditingController txtGhiChuCT = TextEditingController();
@@ -110,6 +117,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
   List<dynamic>? listTypeTS;
   List<dynamic>? listTypeCT;
   List<dynamic>? listReason;
+  List<dynamic>? listReasonFurlough;
   List<dynamic>? listTimesheet;
   List<dynamic>? listHoliday;
   _ChamCongChiTietState(
@@ -120,6 +128,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
       this.listTypeTS,
       this.listTypeCT,
       this.listReason,
+      this.listReasonFurlough,
       this.listTimesheet,
       this.listHoliday);
 
@@ -132,6 +141,9 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
       timeInRestApp = null;
       timeOutRestApp = null;
       furloughNP = new Furlough();
+      dropDownTypeNP = "Nghỉ chế độ";
+      fromDateNP.text = DateFormat("dd/MM/yyyy")
+          .format(DateTime.parse(listDate["start"].toString()));
     });
 
     super.initState();
@@ -371,18 +383,32 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
   }
 
   void changeTypeNP() {
+    furloughNP = new Furlough();
     if (dropDownTypeNP == "Nghỉ phép năm") {
       showNPTT = true;
       showNPCD = false;
       showNPBHXH = false;
     } else if (dropDownTypeNP == "Nghỉ BHXH") {
       showNPTT = false;
-      showNPCD = true;
-      showNPBHXH = false;
-    } else if (dropDownTypeNP == "Nghỉ chế độ") {
-      showNPTT = false;
       showNPCD = false;
       showNPBHXH = true;
+    } else if (dropDownTypeNP == "Nghỉ chế độ") {
+      showNPTT = false;
+      showNPCD = true;
+      showNPBHXH = false;
+    }
+  }
+
+  void changeNumberFurloughMax() {
+    if (listReasonFurlough!.isNotEmpty) {
+      listReasonFurlough!.forEach((element) {
+        if (element["ReasonName"].toString() == dropDownTypeNPCD) {
+          setState(() {
+            String maxInterval = element["MaxInterval"].toString();
+            numberFurloughMaxUse = int.parse(maxInterval);
+          });
+        }
+      });
     }
   }
 
@@ -1032,6 +1058,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
     }
   }
 
+
   void changeNoSalary() {
     var pTNo =
         furloughNP.leaveRemainPrevYear! + furloughNP.avaiableLeaveRemain!;
@@ -1168,7 +1195,7 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
   @override
   Widget build(BuildContext context) {
     if (isLoading!)
-      return  ShimmerLoading();
+      return ShimmerLoading();
     else
       return Container(
         height: widget.height,
@@ -3213,11 +3240,825 @@ class _ChamCongChiTietState extends State<ChamCongChiTiet> {
                             }, () {
                               submitTicketNPTT();
                             })
-                          ]
-                          else if(showNPCD!)...[
-                            
-                          ] else if(showNPBHXH!)...[
-
+                          ] else if (showNPCD!) ...[
+                            FlutterFlowDropDown(
+                              options: listReasonFurlough!
+                                  .where((i) =>
+                                      i["FurloughType"].toString() == "CD")
+                                  .toList()
+                                  .map((e) => e["ReasonName"].toString())
+                                  .toList(),
+                              // listReasonFurlough!.map((e) => e["ReasonName"].toString()).toList(),
+                              onChanged: (val) => setState(() => {
+                                    dropDownTypeNPCD = val,
+                                    changeNumberFurloughMax()
+                                  }),
+                              width: double.infinity,
+                              height: 52,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .bodyText1
+                                  .override(
+                                    fontFamily: 'Inter',
+                                    color: Color(0xFF979DA3),
+                                  ),
+                              hintText: 'Loại phép',
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: FlutterFlowTheme.of(context).theme3,
+                                size: 26,
+                              ),
+                              fillColor: Colors.white,
+                              elevation: 0,
+                              borderColor:
+                                  FlutterFlowTheme.of(context).lineColor,
+                              borderWidth: 0,
+                              borderRadius: 8,
+                              margin:
+                                  EdgeInsetsDirectional.fromSTEB(12, 0, 12, 0),
+                              hidesUnderline: true,
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        0, 0, 5, 0),
+                                    child: TextField(
+                                      controller: fromDateNP,
+                                      onTap: () async {
+                                        DateTime? pickeddate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2101));
+                                        if (pickeddate != null) {
+                                          setState(() {
+                                            fromDateNP.text =
+                                                DateFormat('dd/MM/yyyy')
+                                                    .format(pickeddate);
+                                          });
+                                        }
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: 'Nghỉ từ ngày',
+                                        hintStyle: FlutterFlowTheme.of(context)
+                                            .bodyText2,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        filled: true,
+                                        fillColor:
+                                            FlutterFlowTheme.of(context).theme2,
+                                        suffixIcon: Icon(
+                                          FFIcons.kcalendarAddOn,
+                                          color: Color(0xFF979DA3),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyText1
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            color: Color(0xFF979DA3),
+                                            fontSize: 12,
+                                            lineHeight: 1,
+                                          ),
+                                      keyboardType: TextInputType.none,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        5, 0, 0, 0),
+                                    child: TextFormField(
+                                      controller: toDateNP,
+                                      onTap: () async {
+                                        DateTime? pickeddate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2101));
+                                        if (pickeddate != null) {
+                                          setState(() {
+                                            addDateNP(pickeddate);
+                                          });
+                                        }
+                                      },
+                                      obscureText: false,
+                                      decoration: InputDecoration(
+                                        labelText: 'Nghỉ đến ngày',
+                                        hintStyle: FlutterFlowTheme.of(context)
+                                            .bodyText2,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        filled: true,
+                                        fillColor:
+                                            FlutterFlowTheme.of(context).theme2,
+                                        suffixIcon: Icon(
+                                          FFIcons.kcalendarAddOn,
+                                          color: Color(0xFF979DA3),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyText1
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            color: Color(0xFF979DA3),
+                                            fontSize: 12,
+                                            lineHeight: 1,
+                                          ),
+                                      keyboardType: TextInputType.none,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFAFD5FF),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(0),
+                                            topLeft: Radius.circular(8),
+                                            topRight: Radius.circular(0),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Số ngày nghỉ',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        fontSize: 14,
+                                                      ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: double.infinity,
+                                        height: 35,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFFFFFF5),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(8),
+                                            bottomRight: Radius.circular(0),
+                                            topLeft: Radius.circular(0),
+                                            topRight: Radius.circular(0),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              furloughNP.numberFurlough.toString(),
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodyText1
+                                                  .override(
+                                                    fontFamily: 'Inter',
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .customColor3,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFAFD5FF),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(0),
+                                            topLeft: Radius.circular(0),
+                                            topRight: Radius.circular(8),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Số phép tối đa',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        fontSize: 14,
+                                                      ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: double.infinity,
+                                        height: 35,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFFFFFF5),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(8),
+                                            topLeft: Radius.circular(0),
+                                            topRight: Radius.circular(0),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              numberFurloughMaxUse.toString(),
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodyText1
+                                                  .override(
+                                                    fontFamily: 'Inter',
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .customColor3,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            FFButtonWidget(
+                              onPressed: () async {
+                                await showModalBottomSheet(
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  context: context,
+                                  builder: (context) {
+                                    return Padding(
+                                      padding:
+                                          MediaQuery.of(context).viewInsets,
+                                      child: BtsChiTietPhepPChedoWidget(),
+                                    );
+                                  },
+                                ).then((value) => setState(() {}));
+                              },
+                              text: 'Xem chi tiết nghỉ',
+                              icon: Icon(
+                                FFIcons.kcalendar,
+                                size: 15,
+                              ),
+                              options: FFButtonOptions(
+                                width: double.infinity,
+                                height: 30,
+                                elevation: 0,
+                                color:
+                                    FlutterFlowTheme.of(context).tertiaryColor,
+                                textStyle: FlutterFlowTheme.of(context)
+                                    .subtitle2
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      color: FlutterFlowTheme.of(context)
+                                          .stadeBlue3,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                borderSide: BorderSide(
+                                  color: Colors.transparent,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            _buildNote(txtGhiChuNP),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            _buildFileUpload(),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            _buildCancelSend(() {}, () {})
+                          ] else if (showNPBHXH!) ...[
+                            FlutterFlowDropDown(
+                              options: listReasonFurlough!
+                                  .where((i) =>
+                                      i["FurloughType"].toString() == "BHXH")
+                                  .toList()
+                                  .map((e) => e["ReasonName"].toString())
+                                  .toList(),
+                              // listReasonFurlough!.map((e) => e["ReasonName"].toString()).toList(),
+                              onChanged: (val) => setState(() => {
+                                    dropDownTypeNPCD = val,
+                                    changeNumberFurloughMax()
+                                  }),
+                              width: double.infinity,
+                              height: 52,
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .bodyText1
+                                  .override(
+                                    fontFamily: 'Inter',
+                                    color: Color(0xFF979DA3),
+                                  ),
+                              hintText: 'Loại phép',
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: FlutterFlowTheme.of(context).theme3,
+                                size: 26,
+                              ),
+                              fillColor: Colors.white,
+                              elevation: 0,
+                              borderColor:
+                                  FlutterFlowTheme.of(context).lineColor,
+                              borderWidth: 0,
+                              borderRadius: 8,
+                              margin:
+                                  EdgeInsetsDirectional.fromSTEB(12, 0, 12, 0),
+                              hidesUnderline: true,
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        0, 0, 5, 0),
+                                    child: TextField(
+                                      controller: fromDateNP,
+                                      onTap: () async {
+                                        DateTime? pickeddate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2101));
+                                        if (pickeddate != null) {
+                                          setState(() {
+                                            fromDateNP.text =
+                                                DateFormat('dd/MM/yyyy')
+                                                    .format(pickeddate);
+                                          });
+                                        }
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: 'Nghỉ từ ngày',
+                                        hintStyle: FlutterFlowTheme.of(context)
+                                            .bodyText2,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        filled: true,
+                                        fillColor:
+                                            FlutterFlowTheme.of(context).theme2,
+                                        suffixIcon: Icon(
+                                          FFIcons.kcalendarAddOn,
+                                          color: Color(0xFF979DA3),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyText1
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            color: Color(0xFF979DA3),
+                                            fontSize: 12,
+                                            lineHeight: 1,
+                                          ),
+                                      keyboardType: TextInputType.none,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        5, 0, 0, 0),
+                                    child: TextFormField(
+                                      controller: toDateNP,
+                                      onTap: () async {
+                                        DateTime? pickeddate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2101));
+                                        if (pickeddate != null) {
+                                          setState(() {
+                                            addDateNP(pickeddate);
+                                          });
+                                        }
+                                      },
+                                      obscureText: false,
+                                      decoration: InputDecoration(
+                                        labelText: 'Nghỉ đến ngày',
+                                        hintStyle: FlutterFlowTheme.of(context)
+                                            .bodyText2,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .stateRED2,
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        filled: true,
+                                        fillColor:
+                                            FlutterFlowTheme.of(context).theme2,
+                                        suffixIcon: Icon(
+                                          FFIcons.kcalendarAddOn,
+                                          color: Color(0xFF979DA3),
+                                          size: 24,
+                                        ),
+                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyText1
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            color: Color(0xFF979DA3),
+                                            fontSize: 12,
+                                            lineHeight: 1,
+                                          ),
+                                      keyboardType: TextInputType.none,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFAFD5FF),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(0),
+                                            topLeft: Radius.circular(8),
+                                            topRight: Radius.circular(0),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Số ngày nghỉ',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        fontSize: 14,
+                                                      ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: double.infinity,
+                                        height: 35,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFFFFFF5),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(8),
+                                            bottomRight: Radius.circular(0),
+                                            topLeft: Radius.circular(0),
+                                            topRight: Radius.circular(0),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '2',
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodyText1
+                                                  .override(
+                                                    fontFamily: 'Inter',
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .customColor3,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFAFD5FF),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(0),
+                                            topLeft: Radius.circular(0),
+                                            topRight: Radius.circular(8),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Số phép tối đa',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyText1
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        fontSize: 14,
+                                                      ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        width: double.infinity,
+                                        height: 35,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFFFFFF5),
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(0),
+                                            bottomRight: Radius.circular(8),
+                                            topLeft: Radius.circular(0),
+                                            topRight: Radius.circular(0),
+                                          ),
+                                          border: Border.all(
+                                            color: FlutterFlowTheme.of(context)
+                                                .lineColor,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '2',
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodyText1
+                                                  .override(
+                                                    fontFamily: 'Inter',
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .customColor3,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            _buildNote(txtGhiChuNP),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            _buildFileUpload(),
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            _buildCancelSend(() {}, () {})
                           ]
                         ]
                       ],
